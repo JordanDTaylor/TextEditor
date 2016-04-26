@@ -1,4 +1,4 @@
-package edu.neumont.jotaylor.csc360;
+package edu.neumont.jotaylor.csc360.keyboard;
 
 import edu.neumont.csc415.Desktop;
 
@@ -8,11 +8,11 @@ import java.util.List;
 /**
  * Created by jotaylor on 3/30/2016.
  */
-public class KeyListener implements Runnable {
+public class Keyboard implements IKeyboard, Runnable {
     private Desktop desktop;
-    private List<KeyListener.Observer> observers;
+    private List<IKeyboard.Observer> observers;
 
-    public KeyListener(Desktop desktop) {
+    public Keyboard(Desktop desktop) {
         observers = new ArrayList<>();
 
         this.desktop = desktop;
@@ -23,23 +23,22 @@ public class KeyListener implements Runnable {
     @Override
     public void run() {
         while(true){
-            if(desktop.hasKeysQueued()){
+            if(desktop.hasKeysQueued())
                 notifyObservers((char) desktop.getKeyCode());
-            }else{
+            else
                 Thread.yield();
-            }
-
         }
     }
 
 
     protected void notifyObservers(int keyCode) {
-        for (KeyListener.Observer observer : observers) {
+        for (IKeyboard.Observer observer : observers) {
             observer.keyPressed(keyCode);
         }
     }
 
-    public void register(KeyListener.Observer observer){
+    @Override
+    public void register(IKeyboard.Observer observer){
         if(observers.contains(observer)){
             throw new RuntimeException("Observable already registered");
         }else{
@@ -47,13 +46,11 @@ public class KeyListener implements Runnable {
         }
     }
 
-    public void deregister(KeyListener.Observer observer){
+    @Override
+    public void deregister(IKeyboard.Observer observer){
         if(this.observers.contains(observer)){
             this.observers.remove(observer);
         }
     }
 
-    public interface Observer{
-        void keyPressed(int keyCode);
-    }
 }

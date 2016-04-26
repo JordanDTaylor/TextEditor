@@ -4,7 +4,7 @@ import edu.neumont.csc415.Desktop;
 import edu.neumont.csc415.DesktopColor;
 import edu.neumont.csc415.DesktopGraphics;
 import edu.neumont.csc415.Point;
-import edu.neumont.jotaylor.csc360.KeyListener;
+import edu.neumont.jotaylor.csc360.keyboard.Keyboard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by jotaylor on 3/30/2016.
  */
-public class Window implements IWindow, KeyListener.Observer {
+public class Window implements IWindow, Keyboard.Observer {
     private static final int KEY_CODE_NEW_LINE = 10;
     private static final int KEY_CODE_SINGLE_QUOTE = 222;
     private static final int DEFAULT_HEIGHT = 400;

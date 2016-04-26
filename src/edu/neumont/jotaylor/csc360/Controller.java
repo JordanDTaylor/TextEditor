@@ -1,6 +1,7 @@
 package edu.neumont.jotaylor.csc360;
 
 import edu.neumont.csc415.Desktop;
+import edu.neumont.jotaylor.csc360.keyboard.Keyboard;
 import edu.neumont.jotaylor.csc360.window.BorderWindowDecorator;
 import edu.neumont.jotaylor.csc360.window.IWindow;
 import edu.neumont.jotaylor.csc360.window.TitleBarWindowDecorator;
@@ -9,7 +10,7 @@ import edu.neumont.jotaylor.csc360.window.Window;
 import java.awt.*;
 
 public class Controller {
-    KeyListener keyListener;
+    Keyboard keyboard;
 
     public Controller() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -18,7 +19,7 @@ public class Controller {
         int desktopHeight = screenSize.height - 50;
 
         Desktop desktop = new Desktop(desktopWidth, desktopHeight);
-        keyListener = new KeyListener(desktop);
+        keyboard = new Keyboard(desktop);
 
         int xDivisions = 12;
         int yDivisions = 10;
@@ -46,7 +47,7 @@ public class Controller {
 
     private Window makeBaseWindow(Desktop desktop, int width, int height, int x, int y, String title){
         Window window = new Window(desktop, width, height, x, y, title);
-        keyListener.register(window);
+        keyboard.register(window);
         return window;
     }
 
