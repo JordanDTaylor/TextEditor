@@ -1,15 +1,13 @@
-package edu.neumont.jotaylor.csc360.window;
+package edu.neumont.jotaylor.csc360.window.decorators;
 
 import edu.neumont.csc415.Desktop;
+import edu.neumont.csc415.DesktopColor;
 import edu.neumont.csc415.DesktopGraphics;
+import edu.neumont.jotaylor.csc360.util.Logger;
+import edu.neumont.jotaylor.csc360.window.IWindow;
 
-/**
- * Created by jotaylor on 4/8/2016.
- */
 public abstract class AbstractWindowDecorator implements IWindow {
     protected IWindow innerWindow;
-    protected int height;
-    protected int width;
     protected Desktop desktop;
     protected boolean repaintFlag;
 
@@ -21,6 +19,7 @@ public abstract class AbstractWindowDecorator implements IWindow {
 
     @Override
     public void paint(DesktopGraphics desktopGraphics) {
+        Logger.log("AbsWindowDec", "Repaint Called");
         innerWindow.paint(desktopGraphics);
 
         if(decoratorsShouldRepaint() || repaintFlag)
@@ -35,6 +34,30 @@ public abstract class AbstractWindowDecorator implements IWindow {
     }
 
     @Override
+    public void setTitle(String title){
+        innerWindow.setTitle(title);
+    }
+    @Override
+    public void setForegroundColor(DesktopColor foregroundColor) {
+        innerWindow.setForegroundColor(foregroundColor);
+    }
+
+    @Override
+    public final DesktopColor getForegroundColor() {
+        return innerWindow.getForegroundColor();
+    }
+
+    @Override
+    public void setBackgroundColor(DesktopColor backgroundColor) {
+        innerWindow.setBackgroundColor(backgroundColor);
+    }
+
+    @Override
+    public final DesktopColor getBackgroundColor() {
+        return innerWindow.getBackgroundColor();
+    }
+
+    @Override
     public Desktop getDesktop(){
         return desktop;
     }
@@ -43,6 +66,7 @@ public abstract class AbstractWindowDecorator implements IWindow {
     public boolean decoratorsShouldRepaint() {
         return innerWindow.decoratorsShouldRepaint();
     }
+
 
     protected abstract void doPaintStuff(DesktopGraphics desktopGraphics);
 }

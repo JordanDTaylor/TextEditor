@@ -1,17 +1,13 @@
-package edu.neumont.jotaylor.csc360.window;
+package edu.neumont.jotaylor.csc360.util;
 
 import edu.neumont.csc415.Point;
 
 public class Cursor{
     private Point position;
-    private Point home = new Point(0,0);
+    private Point home;
 
-    public Cursor() {
-        position = home;
-    }
-
-    public Cursor(int homeX, int homeY) {
-        setHome(new Point(homeX, homeY));
+    public Cursor (int x, int y){
+        setHome(new Point(x, y));
         position = home;
     }
 

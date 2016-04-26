@@ -1,4 +1,4 @@
-package edu.neumont.jotaylor.csc360;
+package edu.neumont.jotaylor.csc360.util;
 
 import edu.neumont.csc415.Point;
 

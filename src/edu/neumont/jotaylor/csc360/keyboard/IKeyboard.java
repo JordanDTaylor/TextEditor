@@ -5,7 +5,7 @@ public interface IKeyboard {
 
     void deregister(Observer observer);
 
-    public interface Observer{
+    interface Observer{
         void keyPressed(int keyCode);
     }
 }

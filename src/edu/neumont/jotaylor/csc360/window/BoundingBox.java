@@ -14,44 +14,60 @@ public class BoundingBox {
      *
      * @defaultValue 0.0
      */
-    public final double getMinX() { return minX; }
-    private double minX;
+    public final int getMinX() { return minX; }
+    private int minX;
 
     /**
      * The y coordinate of the upper-left corner of this {@code BoundingBox}.
      *
      * @defaultValue 0.0
      */
-    public final double getMinY() { return minY; }
-    private double minY;
+    public final int getMinY() { return minY; }
+    private int minY;
     /**
      * The width of this {@code BoundingBox}.
      *
      * @defaultValue 0.0
      */
-    public final double getWidth() { return width; }
-    private double width;
+    public final int getWidth() { return width; }
+    private int width;
     /**
      * The height of this {@code BoundingBox}.
      *
      * @defaultValue 0.0
      */
-    public final double getHeight() { return height; }
-    private double height;
+    public final int getHeight() { return height; }
+    private int height;
     /**
      * The x coordinate of the lower-right corner of this {@code BoundingBox}.
      *
      * @defaultValue {@code minX + width}
      */
-    public final double getMaxX() { return maxX; }
-    private double maxX;
+    public final int getMaxX() { return maxX; }
+    private int maxX;
     /**
      * The y coordinate of the lower-right corner of this {@code BoundingBox}.
      *
      * @defaultValue {@code minY + height}
      */
-    public final double getMaxY() { return maxY; }
-    private double maxY;
+    public final int getMaxY() { return maxY; }
+    private int maxY;
+
+    public final Point getTopLeft() {
+        return new Point(getMinX(),  getMinY());
+    }
+
+    public final Point getTopRight() {
+        return new Point(getMaxX(), getMinY());
+    }
+
+    public final Point getBottomRight() {
+        return new Point(getMaxX(), getMaxY());
+    }
+
+    public final Point getBottomLeft() {
+        return new Point(getMinX(), getMaxY());
+    }
 
     /**
      * Indicates whether any of the dimensions(width or height) of this bounds
@@ -70,9 +86,8 @@ public class BoundingBox {
      * @return true if the specified point is inside the boundary of this
      * {@code BoundingBox}; false otherwise.
      */
-    public boolean contains(Point p){
-        if(p==null)return false;
-        return contains(p.getX(), p.getY());
+    public boolean contains(Point p) {
+        return p != null && contains(p.getX(), p.getY());
     }
 
     /**
@@ -84,9 +99,12 @@ public class BoundingBox {
      * @return true if the specified {@code (x, y)} coordinates are inside the
      * boundary of this {@code BoundingBox}; false otherwise.
      */
-    public boolean contains(double x, double y){
-        if (isEmpty()) return false;
-        return x >= getMinX() && x <= getMaxX() && y >= getMinY() && y <= getMaxY();
+    public boolean contains(int x, int y) {
+        return !isEmpty()
+                && x >= getMinX()
+                && x <= getMaxX()
+                && y >= getMinY()
+                && y <= getMaxY();
     }
 
     /**
@@ -97,9 +115,9 @@ public class BoundingBox {
      * @return true if the specified Bounds, {@code b}, is inside the
      * boundary of this {@code BoundingBox}; false otherwise.
      */
-    public boolean contains(BoundingBox b){
-        if ((b == null) || b.isEmpty()) return false;
-        return contains(b.getMinX(), b.getMinY(), b.getWidth(), b.getHeight());
+    public boolean contains(BoundingBox b) {
+        return !((b == null) || b.isEmpty()) &&
+                contains(b.getMinX(), b.getMinY(), b.getWidth(), b.getHeight());
     }
 
     /**
@@ -110,26 +128,25 @@ public class BoundingBox {
      * rectangular area
      * @param y the y coordinate of the upper-left corner of the specified
      * rectangular area
-     * @param w the width of the specified rectangular area
-     * @param h the height of the specified rectangular area
+     * @param width the width of the specified rectangular area
+     * @param height the height of the specified rectangular area
      * @return true if the interior of this {@code BoundingBox} entirely contains
      * the specified rectangular area; false otherwise.
      */
-    public boolean contains(double x, double y, double w, double h){
-        return contains(x, y) && contains(x + w, y + h);
+    public boolean contains(int x, int y, int width, int height){
+        return contains(x, y) && contains(x + width, y + height);
     }
 
     /**
      * Tests if the interior of this {@code BoundingBox} intersects the interior
-     * of a specified Bounds, {@code b}.
+     * of a specified Bounds, {@code bBox}.
      *
-     * @param b The specified Bounds
+     * @param bBox The specified Bounds
      * @return true if the interior of this {@code BoundingBox} and the interior
-     * of the specified Bounds, {@code b}, intersect.
+     * of the specified Bounds, {@code bBox}, intersect.
      */
-    public boolean intersects(BoundingBox b){
-        if(b==null)return false;
-        return intersects(b.getMinX(), b.getMinY(), b.getWidth(), b.getHeight());
+    public boolean intersects(BoundingBox bBox) {
+        return bBox != null && intersects(bBox.getMinX(), bBox.getMinY(), bBox.getWidth(), bBox.getHeight());
     }
 
     /**
@@ -140,17 +157,18 @@ public class BoundingBox {
      * rectangular area
      * @param y the y coordinate of the upper-left corner of the specified
      * rectangular area
-     * @param w the width of the specified rectangular area
-     * @param h the height of the specified rectangular area
+     * @param width the width of the specified rectangular area
+     * @param height the height of the specified rectangular area
      * @return true if the interior of this {@code BoundingBox} and the interior
      * of the rectangular area intersect.
      */
-    public boolean intersects(double x, double y, double w, double h){
-        if (isEmpty() || w < 0 || h < 0 ) return false;
-        return (x + w >= getMinX() &&
-                        y + h >= getMinY() &&
-                        x <= getMaxX() &&
-                        y <= getMaxY());
+    public boolean intersects(int x, int y, int width, int height) {
+        return !(isEmpty() || width < 0 || height < 0) &&
+                (
+                    x + width >= getMinX() &&
+                    y + height >= getMinY() &&
+                    x <= getMaxX() && y <= getMaxY()
+                );
     }
 
     /**
@@ -160,7 +178,7 @@ public class BoundingBox {
      * @param width the width of the {@code BoundingBox}
      * @param height the height of the {@code BoundingBox}
      */
-    protected BoundingBox(double minX, double minY, double width, double height) {
+    public BoundingBox(int minX, int minY, int width, int height) {
         this.minX = minX;
         this.minY = minY;
         this.width = width;
@@ -186,8 +204,6 @@ public class BoundingBox {
         } else return false;
     }
 
-
-
     /**
      * Returns a hash code value for the object.
      * @return a hash code value for the object.
@@ -195,10 +211,10 @@ public class BoundingBox {
     @Override public int hashCode() {
         if (hash == 0) {
             long bits = 7L;
-            bits = 31L * bits + Double.doubleToLongBits(getMinX());
-            bits = 31L * bits + Double.doubleToLongBits(getMinY());
-            bits = 31L * bits + Double.doubleToLongBits(getWidth());
-            bits = 31L * bits + Double.doubleToLongBits(getHeight());
+            bits = 31L * bits + getMinX();
+            bits = 31L * bits + getMinY();
+            bits = 31L * bits + getWidth();
+            bits = 31L * bits + getHeight();
             hash = (int) (bits ^ (bits >> 32));
         }
         return hash;

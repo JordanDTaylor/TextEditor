@@ -1,69 +1,59 @@
 package edu.neumont.jotaylor.csc360;
 
 import edu.neumont.csc415.Desktop;
-import edu.neumont.jotaylor.csc360.keyboard.Keyboard;
-import edu.neumont.jotaylor.csc360.window.BorderWindowDecorator;
+import edu.neumont.jotaylor.csc360.configuration.Configuration;
+import edu.neumont.jotaylor.csc360.keyboard.IKeyboard;
+import edu.neumont.jotaylor.csc360.keyboard.KeyboardFactory;
+import edu.neumont.jotaylor.csc360.configuration.KeyboardType;
+import edu.neumont.jotaylor.csc360.util.Logger;
 import edu.neumont.jotaylor.csc360.window.IWindow;
-import edu.neumont.jotaylor.csc360.window.TitleBarWindowDecorator;
-import edu.neumont.jotaylor.csc360.window.Window;
+import edu.neumont.jotaylor.csc360.window.factory.WindowFactory;
 
 import java.awt.*;
+import java.io.IOException;
 
 public class Controller {
-    Keyboard keyboard;
-
+    WindowFactory theWindowMaker;
+    Configuration configuration;
     public Controller() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
-        int desktopWidth = screenSize.width - 50;
-        int desktopHeight = screenSize.height - 50;
+        try {
+            configuration = Configuration.read(Configuration.DEFAULT_PATH);
+        } catch (IOException e) {
+            Logger.log(logType, "Configuration couldn't be loaded, using defaults.'");
+        }
 
-        Desktop desktop = new Desktop(desktopWidth, desktopHeight);
-        keyboard = new Keyboard(desktop);
+        Logger.log(logType, "Configuration is \n" + configuration.toString());
 
-        int xDivisions = 12;
-        int yDivisions = 10;
+        int desktopWidth = screenSize.width - 75;
+        int desktopHeight = screenSize.height - 75;
 
-        int xDiv = (desktopWidth / xDivisions);
-        int yDiv = (desktopHeight / yDivisions);
+        Desktop desktop = new Desktop(desktopWidth / 2, desktopHeight);
 
-        int width = (xDivisions / 2 - 2) * xDiv;
-        int height = (yDivisions / 2 - 2) * yDiv;
+        IKeyboard keyboard;
 
-//        IWindow basicWindow = makeBaseWindow(desktop, width, height, xDiv, yDiv, "NU Word");
-//        desktop.registerPaintable(basicWindow);
+        KeyboardType keyboardType = configuration.getKeyboardType();
+        Logger.log(logType, "Initializing keyboard type " + keyboardType);
+        keyboard = KeyboardFactory.getKeyboard(keyboardType, desktop);
 
-//        IWindow titledWindow = makeTitledWindow(desktop, width, height, xDiv * (xDivisions / 2 + 1), yDiv, "Titled Window");
-//        desktop.registerPaintable(titledWindow);
-//
-//        IWindow titledBordedWindow = makeTitledBorderedWindow(desktop, width, height, xDiv, yDiv * (yDivisions / 2 + 1), "Titled Bordered Window");
-//        desktop.registerPaintable(titledBordedWindow);
-//
-        IWindow borderedTitledBordedWindow = makeBorderedTitledBorderedWindow(desktop, width, height, xDiv * (xDivisions / 2 + 1), yDiv * (yDivisions / 2 + 1), "Bordered Titled Bordered Window");
-        desktop.registerPaintable(borderedTitledBordedWindow);
+        Logger.log(logType, "Setting window factory of type " + configuration.getWindowType());
+        theWindowMaker = WindowFactory.getFactory(configuration);
+
+        int width = configuration.getWindowWidth();
+        int height = configuration.getWindowHeight();
+        int startingPositionX = 9 + 50;
+        int startingPositionY = 39 +  50;
+
+        Logger.log(logType, "Creating " + configuration.getWindowType() + " window.");
+        IWindow window = theWindowMaker.createWindow(desktop, keyboard, width, height, startingPositionX, startingPositionY, "Text Editor");
+
+        desktop.registerPaintable(window);
+        Logger.log(logType, "Repainting the desktop.");
 
         desktop.repaint();
     }
+    String logType = "Controller";
 
-    private Window makeBaseWindow(Desktop desktop, int width, int height, int x, int y, String title){
-        Window window = new Window(desktop, width, height, x, y, title);
-        keyboard.register(window);
-        return window;
-    }
-
-    private IWindow makeTitledWindow(Desktop desktop, int width, int height, int x, int y, String title) {
-        Window base = makeBaseWindow(desktop, width, height, x, y, title);
-        return new TitleBarWindowDecorator(base);
-    }
-
-    private IWindow makeTitledBorderedWindow(Desktop desktop, int width, int height, int x, int y, String title) {
-        Window base = makeBaseWindow(desktop, width, height, x, y, title);
-        return new TitleBarWindowDecorator(new BorderWindowDecorator(base));
-    }
-
-    private IWindow makeBorderedTitledBorderedWindow(Desktop desktop, int width, int height, int x , int y, String title) {
-        Window base = makeBaseWindow(desktop, width, height, x, y, title);
-        return new BorderWindowDecorator(new TitleBarWindowDecorator(new BorderWindowDecorator(base)));
-    }
 }
 

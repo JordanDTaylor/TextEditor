@@ -9,10 +9,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * Created by jorda on 4/26/2016.
- */
-public class Configuration {
+public class Configuration{
     private static final String DEFAULT_CONFIG_PATH = "default.config";
 
     Map<String, String> config;
@@ -20,15 +17,15 @@ public class Configuration {
 
     Configuration(Map<String, String> map){config = map;}
 
-    private static Configuration read() {
-        Configuration c = null;
-        try {
-            c = read(DEFAULT_PATH);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return c;
-    }
+//    private static Configuration read() {
+//        Configuration c = null;
+//        try {
+//            c = read(DEFAULT_PATH);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return c;
+//    }
     /**
      * @param path the path to the configuration file;
      * @return a new instance of configuration built based on the file path
@@ -50,16 +47,13 @@ public class Configuration {
     }
 
     protected static Map<String, String> getMap(String path) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(path));
 
         Map<String, String> config = null;
-        try {
+        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
             config = reader.lines()
                     .map(s -> s.toUpperCase()
-                            .split(":"))
-                    .collect(Collectors.toMap(strings -> strings[0].trim(), strings -> strings[1].trim()));
-        }finally {
-            reader.close();
+                        .split(":"))
+                        .collect(Collectors.toMap(strings -> strings[0].trim(), strings -> strings[1].trim()));
         }
         return config;
     }
@@ -154,5 +148,4 @@ public class Configuration {
         TITLE,
         BORDERCOLOR
     }
-
 }

@@ -4,10 +4,7 @@ import edu.neumont.csc415.DesktopColor;
 
 import java.util.HashMap;
 
-/**
- * Created by jorda on 4/25/2016.
- */
-public class ColorMap {
+public class ColorMap{
     private static HashMap<String, DesktopColor> colors = new HashMap<>();
     static {
         colors.put("BLACK", DesktopColor.BLACK);
@@ -30,4 +27,5 @@ public class ColorMap {
     public static DesktopColor get(String color){
         return colors.get(color.toUpperCase());
     }
+
 }

@@ -1,9 +1,6 @@
 package edu.neumont.jotaylor.csc360.keyboard;
 
-import edu.neumont.csc415.Desktop;
-
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,7 +38,7 @@ public class MockKeyboard implements IKeyboard, Runnable {
             sleep(400);
             for (char c : readKeyFile().toCharArray()) {
                 note(c);
-                sleep((long)(Math.random()*100) + 10);
+//                sleep((long)(Math.random()*100) + 10);
             }
 
         } catch (InterruptedException e) {
@@ -61,12 +58,9 @@ public class MockKeyboard implements IKeyboard, Runnable {
             while((line = reader.readLine()) != null){
                 out+=line + "\n";
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
         return out;
     }
 }
-
