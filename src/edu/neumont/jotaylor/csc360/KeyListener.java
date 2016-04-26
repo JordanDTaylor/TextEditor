@@ -25,7 +25,10 @@ public class KeyListener implements Runnable {
         while(true){
             if(desktop.hasKeysQueued()){
                 notifyObservers((char) desktop.getKeyCode());
+            }else{
+                Thread.yield();
             }
+
         }
     }
 
