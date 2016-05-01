@@ -4,6 +4,8 @@ import edu.neumont.csc415.Desktop;
 import edu.neumont.csc415.DesktopColor;
 import edu.neumont.csc415.DesktopGraphics;
 import edu.neumont.csc415.Point;
+import edu.neumont.jotaylor.csc360.mvc.ITextModel;
+import edu.neumont.jotaylor.csc360.mvc.ITextView;
 import edu.neumont.jotaylor.csc360.util.Cursor;
 
 import java.util.ArrayList;
@@ -11,7 +13,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-public class TextBox {
+public class TextBox implements ITextView {
     private static final int KEY_CODE_SINGLE_QUOTE = 222;
     private static final int KEY_CODE_BACKSPACE = 8;
     private static final int KEY_CODE_NEW_LINE = 10;
@@ -111,5 +113,10 @@ public class TextBox {
     public void setBounds(BoundingBox bounds) {
         this.bounds = bounds;
         cursor = new Cursor(bounds.getMinX(), bounds.getMinY() + desktop.getCharHeight());
+    }
+
+    @Override
+    public void update(ITextModel model) {
+
     }
 }
