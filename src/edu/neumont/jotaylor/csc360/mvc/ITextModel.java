@@ -1,5 +1,7 @@
 package edu.neumont.jotaylor.csc360.mvc;
 
+import edu.neumont.csc415.Point;
+
 public interface ITextModel{
     void register(ITextModelObserver observer);
     void deregister(ITextModelObserver observer);
@@ -12,5 +14,6 @@ public interface ITextModel{
     void moveRight();
 
     char[][] fitText(int numRows, int numCols);
+    Point getCursorLocation();
 }
 

@@ -1,5 +1,6 @@
 package edu.neumont.jotaylor.csc360.mvc;
 
+import edu.neumont.csc415.Point;
 import edu.neumont.jotaylor.csc360.util.Logger;
 import sun.rmi.runtime.Log;
 
@@ -17,6 +18,8 @@ public class TextBuffer implements ITextModel {
         right = new ArrayList<>();
         left = new ArrayList<>();
         observers = new ArrayList<>();
+
+        cursorLocaiton = new Point(0, 0);
     }
 
     @Override
@@ -34,11 +37,12 @@ public class TextBuffer implements ITextModel {
     public char[][] fitText(int numRows, int numCols) {
         logCommand("fltText");
 
-
         ListIterator<Character> leftItr = left.listIterator();
         ListIterator<Character> rightItr = right.listIterator(right.size());
 
         char [][] text = new char[numRows][numCols];
+        boolean cursorUpdated = false;
+
         try {
             for (int row = 0; row < numRows; row++) {
                 for (int column = 0; column < numCols; column++) {
@@ -47,20 +51,39 @@ public class TextBuffer implements ITextModel {
                     if (leftItr.hasNext())
                         next = leftItr.next();
 
-                    else if (rightItr.hasPrevious())
-                        next = rightItr.previous();
-
+                    else {
+                        if(!cursorUpdated){
+                            cursorLocaiton = new Point(column, row);
+                            cursorUpdated = true;
+                        }
+                        if (rightItr.hasPrevious())
+                            next = rightItr.previous();
+                    }
                     if (next == LINE_FEED && column < numCols) {
                         row++;
-                        column = 0;
+                        column = -1;
                     } else
                         text[row][column] = next;
+
                 }
             }
+//            int totalSize = left.size()+right.size();
+//            if(totalSize < numCols*numRows)
+//            {
+//                int r = totalSize/numRows;
+//                int c = totalSize%numRows;
+//
+//            }
         }catch (Exception e){
             System.out.println(e.getMessage());
         }
         return text;
+    }
+    private Point cursorLocaiton;
+
+    @Override
+    public Point getCursorLocation() {
+        return cursorLocaiton;
     }
 
     @Override

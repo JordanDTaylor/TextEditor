@@ -7,7 +7,7 @@ public class Controller implements IInputObserver{
 
     private static final int SINGLE_QUOTE = 222;
     private static final int BACKSPACE = 8;
-    private static final int DELETE = 999;
+    private static final int DELETE = 127;
     private static final int HARD_RETURN = 10;
 
     private static final int LEFT_ARROW = 17;
@@ -16,11 +16,9 @@ public class Controller implements IInputObserver{
     private static final int DOWN_ARROW = 20;
 
     private final ITextModel model;
-//    private final ITextView view;
 
     public Controller(ITextModel model, ITextView view) {
         this.model = model;
-//        this.view = view;
         view.register(this);
         model.register(view);
     }
@@ -28,6 +26,7 @@ public class Controller implements IInputObserver{
     @Override
     public void keyPressed(int keyCode) {
         Logger.log(this.getClass().getSimpleName(), "keyCode: " + keyCode + " received." );
+//        System.out.println(keyCode);
         switch (keyCode){
             case SINGLE_QUOTE:
                 addToModel('\'');
@@ -46,6 +45,14 @@ public class Controller implements IInputObserver{
                 break;
             case RIGHT_ARROW:
                 model.moveRight();
+                break;
+            case UP_ARROW:
+//                model.moveUp();
+                model.add((char)0x25B4);
+                break;
+            case DOWN_ARROW:
+//                model.moveDown();
+                model.add((char)0x25BE);
                 break;
             default:
                 model.add((char) keyCode);

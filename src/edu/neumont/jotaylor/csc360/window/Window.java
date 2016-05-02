@@ -4,6 +4,7 @@ import edu.neumont.csc415.*;
 import edu.neumont.jotaylor.csc360.mvc.*;
 import edu.neumont.jotaylor.csc360.util.BoundingBoxUtil;
 import edu.neumont.jotaylor.csc360.util.Logger;
+import edu.neumont.jotaylor.csc360.util.Points;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -142,11 +143,15 @@ public class Window implements IWindow, ITextView{
             observer.keyPressed(keyCode);
         }
     }
+    private Point cursorLocation = new Point(0,0);
 
     @Override
     public void onModelChange(ITextModel model) {
         textBox.text = model.fitText(textBox.numRows, textBox.numCols);
+        cursorLocation = model.getCursorLocation();
+
         Logger.log("Window","Model changed");
+
         desktop.repaint();
     }
 
@@ -176,16 +181,20 @@ public class Window implements IWindow, ITextView{
 
             for (int row = 0; row < numRows; row++) {
                 for (int column = 0; column < numCols; column++) {
+
                     char charToDraw = text[row][column];
 
                     int x = baseX + charWidth * column;
                     int y = baseY + charHeight * row;
 
                     Point location = new Point(x, y);
+                    if(cursorLocation.getY() == row && cursorLocation.getX() == column )
+                        desktopGraphics.drawLine(Points.addToPoint(location, 0, 4),Points.addToPoint(location, charWidth, 4), cursorColor);
                     desktopGraphics.drawChar(charToDraw, location, textColor);
                 }
             }
         }
+        private DesktopColor cursorColor = DesktopColor.WHITE;
 
         public DesktopColor getTextColor() {
             return textColor;
