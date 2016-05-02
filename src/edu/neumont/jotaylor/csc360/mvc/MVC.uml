@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement />
+  <nodes>
+    <node x="2.5" y="315.0">edu.neumont.jotaylor.csc360.mvc.TextBuffer</node>
+    <node x="175.5" y="80.0">edu.neumont.jotaylor.csc360.mvc.ITextView</node>
+    <node x="0.0" y="235.0">edu.neumont.jotaylor.csc360.mvc.ITextModel</node>
+    <node x="357.0" y="80.0">edu.neumont.jotaylor.csc360.keyboard.IKeyboard</node>
+    <node x="307.5" y="0.0">edu.neumont.jotaylor.csc360.mvc.IObersvableInput</node>
+    <node x="147.5" y="0.0">edu.neumont.jotaylor.csc360.mvc.ITextModelObserver</node>
+    <node x="15.5" y="0.0">edu.neumont.jotaylor.csc360.mvc.IInputObserver</node>
+    <node x="0.0" y="80.0">edu.neumont.jotaylor.csc360.mvc.Controller</node>
+    <node x="178.5" y="160.0">edu.neumont.jotaylor.csc360.window.Window</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="edu.neumont.jotaylor.csc360.window.Window" target="edu.neumont.jotaylor.csc360.mvc.ITextView">
+      <point x="0.0" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="edu.neumont.jotaylor.csc360.mvc.ITextView" target="edu.neumont.jotaylor.csc360.mvc.IObersvableInput">
+      <point x="28.0" y="-15.0" />
+      <point x="245.5" y="55.0" />
+      <point x="338.5" y="55.0" />
+      <point x="-31.0" y="15.0" />
+    </edge>
+    <edge source="edu.neumont.jotaylor.csc360.keyboard.IKeyboard" target="edu.neumont.jotaylor.csc360.mvc.IObersvableInput">
+      <point x="0.0" y="-15.0" />
+      <point x="31.0" y="15.0" />
+    </edge>
+    <edge source="edu.neumont.jotaylor.csc360.mvc.TextBuffer" target="edu.neumont.jotaylor.csc360.mvc.ITextModel">
+      <point x="0.0" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="edu.neumont.jotaylor.csc360.mvc.ITextView" target="edu.neumont.jotaylor.csc360.mvc.ITextModelObserver">
+      <point x="0.0" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="edu.neumont.jotaylor.csc360.mvc.ITextView" target="edu.neumont.jotaylor.csc360.mvc.IInputObserver">
+      <point x="-28.0" y="-15.0" />
+      <point x="189.5" y="55.0" />
+      <point x="99.5" y="55.0" />
+      <point x="28.0" y="15.0" />
+    </edge>
+    <edge source="edu.neumont.jotaylor.csc360.mvc.Controller" target="edu.neumont.jotaylor.csc360.mvc.IInputObserver">
+      <point x="0.0" y="-15.0" />
+      <point x="-28.0" y="15.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="222.0" y="172.5" />
+  <SelectedNodes />
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>public</VISIBILITY>
+</Diagram>
+
