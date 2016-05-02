@@ -1,11 +1,6 @@
 package edu.neumont.jotaylor.csc360.keyboard;
 
-public interface IKeyboard {
-    void register(Observer observer);
+import edu.neumont.jotaylor.csc360.mvc.IObersvableInput;
 
-    void deregister(Observer observer);
-
-    interface Observer{
-        void keyPressed(int keyCode);
-    }
+public interface IKeyboard extends IObersvableInput {
 }

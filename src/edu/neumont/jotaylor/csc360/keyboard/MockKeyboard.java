@@ -1,5 +1,8 @@
 package edu.neumont.jotaylor.csc360.keyboard;
 
+import edu.neumont.jotaylor.csc360.mvc.IInputObserver;
+import edu.neumont.jotaylor.csc360.mvc.IObersvableInput;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -9,7 +12,7 @@ import java.util.List;
 import static java.lang.Thread.sleep;
 
 public class MockKeyboard implements IKeyboard, Runnable {
-    private List<Observer> observers;
+    private List<IInputObserver> observers;
 
     public MockKeyboard() {
         this.observers = new ArrayList<>();
@@ -17,7 +20,7 @@ public class MockKeyboard implements IKeyboard, Runnable {
     }
 
     @Override
-    public void register(Observer observer) {
+    public void register(IInputObserver observer) {
         if(observers.contains(observer)){
             throw new RuntimeException("Observable already registered");
         }else{
@@ -26,7 +29,7 @@ public class MockKeyboard implements IKeyboard, Runnable {
     }
 
     @Override
-    public void deregister(Observer observer) {
+    public void deregister(IInputObserver observer) {
         observers.remove(observer);
     }
 
@@ -35,7 +38,7 @@ public class MockKeyboard implements IKeyboard, Runnable {
         while(observers.isEmpty()) Thread.yield();
 
         try {
-            sleep(400);
+            sleep(100);
             for (char c : readKeyFile().toCharArray()) {
                 note(c);
 //                sleep((long)(Math.random()*100) + 10);
@@ -47,7 +50,7 @@ public class MockKeyboard implements IKeyboard, Runnable {
     }
 
     private void note(int keyCode){
-        for (Observer o:observers) {
+        for (IInputObserver o:observers) {
             o.keyPressed(keyCode);
         }
     }

@@ -1,6 +1,8 @@
 package edu.neumont.jotaylor.csc360.keyboard;
 
 import edu.neumont.csc415.Desktop;
+import edu.neumont.jotaylor.csc360.mvc.IInputObserver;
+import edu.neumont.jotaylor.csc360.mvc.IObersvableInput;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,13 +12,11 @@ import java.util.List;
  */
 public class Keyboard implements IKeyboard, Runnable {
     private Desktop desktop;
-    private List<IKeyboard.Observer> observers;
+    private List<IInputObserver> observers;
 
     public Keyboard(Desktop desktop) {
         observers = new ArrayList<>();
-
         this.desktop = desktop;
-
         new Thread(this).start();
     }
 
@@ -24,21 +24,20 @@ public class Keyboard implements IKeyboard, Runnable {
     public void run() {
         while(true){
             if(desktop.hasKeysQueued())
-                notifyObservers((char) desktop.getKeyCode());
+                keyPressed(desktop.getKeyCode());
             else
                 Thread.yield();
         }
     }
 
-
-    protected void notifyObservers(int keyCode) {
-        for (IKeyboard.Observer observer : observers) {
+    protected void keyPressed(int keyCode) {
+        for (IInputObserver observer : observers) {
             observer.keyPressed(keyCode);
         }
     }
 
     @Override
-    public void register(IKeyboard.Observer observer){
+    public void register(IInputObserver observer) {
         if(observers.contains(observer)){
             throw new RuntimeException("Observable already registered");
         }else{
@@ -46,11 +45,11 @@ public class Keyboard implements IKeyboard, Runnable {
         }
     }
 
+
     @Override
-    public void deregister(IKeyboard.Observer observer){
+    public void deregister(IInputObserver observer) {
         if(this.observers.contains(observer)){
             this.observers.remove(observer);
         }
     }
-
 }

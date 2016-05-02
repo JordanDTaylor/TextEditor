@@ -5,6 +5,8 @@ import edu.neumont.jotaylor.csc360.configuration.Configuration;
 import edu.neumont.jotaylor.csc360.keyboard.IKeyboard;
 import edu.neumont.jotaylor.csc360.keyboard.KeyboardFactory;
 import edu.neumont.jotaylor.csc360.configuration.KeyboardType;
+import edu.neumont.jotaylor.csc360.mvc.Controller;
+import edu.neumont.jotaylor.csc360.mvc.TextBuffer;
 import edu.neumont.jotaylor.csc360.util.Logger;
 import edu.neumont.jotaylor.csc360.window.IWindow;
 import edu.neumont.jotaylor.csc360.window.factory.WindowFactory;
@@ -22,6 +24,7 @@ public class TextEditor {
         IKeyboard keyboard = KeyboardFactory.getKeyboard(configuration.getKeyboardType(), desktop);
         WindowFactory theWindowMaker = WindowFactory.getFactory(configuration);
 
+
         int width = configuration.getWindowWidth();
         int height = configuration.getWindowHeight();
         int startingPositionX = 9 + 50;
@@ -29,6 +32,8 @@ public class TextEditor {
 
         Logger.log(logType, "Creating " + configuration.getWindowType() + " window.");
         IWindow window = theWindowMaker.createWindow(desktop, keyboard, width, height, startingPositionX, startingPositionY, "Text Editor");
+
+
 
         desktop.registerPaintable(window);
         Logger.log(logType, "Repainting the desktop.");

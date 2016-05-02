@@ -1,50 +1,57 @@
 package edu.neumont.jotaylor.csc360.window;
 
-import edu.neumont.csc415.Desktop;
-import edu.neumont.csc415.DesktopColor;
-import edu.neumont.csc415.DesktopGraphics;
+import edu.neumont.csc415.*;
+import edu.neumont.jotaylor.csc360.mvc.*;
 import edu.neumont.jotaylor.csc360.util.BoundingBoxUtil;
-import edu.neumont.jotaylor.csc360.keyboard.IKeyboard;
+import edu.neumont.jotaylor.csc360.util.Logger;
 
-public class Window implements IWindow, IKeyboard.Observer {
-//    private static final int DEFAULT_HEIGHT = 400;
-//    private static final int DEFAULT_WIDTH = 400;
-//    public static final int BOTTOM_MARGIN = 7;
+import java.util.ArrayList;
+import java.util.List;
 
-    private final int margin = 5;
-    private Desktop desktop;
-
-    private BoundingBox boundingBox;
-
-    private TextBox textBox;
-    private DesktopColor backgroundColor;
-
-    private boolean repaintForKeystroke;
+public class Window implements IWindow, ITextView{
 
     private String title;
+    private TextBox textBox;
+    private Desktop desktop;
+    private BoundingBox boundingBox;
     private boolean repaintDecorators;
+    private boolean repaintForKeystroke;
+    private DesktopColor backgroundColor;
 
-//    public Window(Desktop desktop, int width, int height, int xPosition, int yPosition, DesktopColor backgroundColor, DesktopColor foregroundColor) {
-//        this(desktop, width, height, xPosition, yPosition, "", backgroundColor, foregroundColor);
-//    }
+    private final int margin = 5;
+    private final int charWidth;
+    private final int charHeight;
+
+    private List<IInputObserver> inputObservers;
 
     public Window(Desktop desktop, int width, int height, int xPosition, int yPosition, String title, DesktopColor backgroundColor, DesktopColor foregroundColor) {
-
         boundingBox = new BoundingBox(xPosition, yPosition, width, height);
 
-        BoundingBox textBounds = BoundingBoxUtil.shrinkAll(boundingBox, margin);
-        textBox = new TextBox(desktop, textBounds, foregroundColor);
+        this.desktop = desktop;
+
+        charHeight = desktop.getCharHeight();
+        charWidth = desktop.getCharWidth('W');
+
+        BoundingBox textBounds = transposeForTextBox(boundingBox);
+
+        int numRows = textBounds.getHeight()/charHeight;
+        int numCols = textBounds.getWidth()/charWidth;
+
+        textBox = new TextBox(textBounds, foregroundColor, numRows, numCols);
+
         this.backgroundColor = backgroundColor;
         setForegroundColor(foregroundColor);
 
         this.title = title;
-        this.desktop = desktop;
+
+        inputObservers = new ArrayList<>();
     }
 
     @Override
     public void paint(DesktopGraphics desktopGraphics) {
 
         desktopGraphics.fillRectangle(boundingBox.getTopLeft(), boundingBox.getBottomRight(), backgroundColor);
+
         textBox.repaint(desktopGraphics);
 
         repaintDecorators = !repaintForKeystroke;
@@ -65,9 +72,15 @@ public class Window implements IWindow, IKeyboard.Observer {
     public void setOrigin(int x, int y) {
         int xOffset = x - boundingBox.getMinX();
         int yOffset = y - boundingBox.getMinY();
+
         boundingBox = BoundingBoxUtil.shift(boundingBox, xOffset, yOffset);
         repaintDecorators = true;
-        textBox.setBounds(BoundingBoxUtil.shrinkAll(boundingBox, margin));
+        textBox.setBounds(transposeForTextBox(boundingBox));
+    }
+
+    private BoundingBox transposeForTextBox(BoundingBox box){
+        BoundingBox shrunken = BoundingBoxUtil.shrinkAll(box, margin);
+        return BoundingBoxUtil.shiftDown(shrunken, charHeight);
     }
 
     @Override
@@ -87,7 +100,6 @@ public class Window implements IWindow, IKeyboard.Observer {
 
     @Override
     public void setForegroundColor(DesktopColor foregroundColor) {
-//        repaintForKeystroke = true;
         textBox.setTextColor(foregroundColor);
     }
 
@@ -98,7 +110,6 @@ public class Window implements IWindow, IKeyboard.Observer {
 
     @Override
     public void setBackgroundColor(DesktopColor backgroundColor) {
-//        repaintForKeystroke = true;
         this.backgroundColor = backgroundColor;
     }
 
@@ -108,9 +119,84 @@ public class Window implements IWindow, IKeyboard.Observer {
     }
 
     @Override
+    public void register(IInputObserver observer) {
+        if(inputObservers.contains(observer)){
+            throw new RuntimeException("Observable already registered");
+        }else{
+            this.inputObservers.add(observer);
+            Logger.log(this.getClass().getSimpleName(), "Observer \""+ observer.getClass().getSimpleName() + "\" registered" );
+        }
+    }
+
+    @Override
+    public void deregister(IInputObserver observer) {
+        if(inputObservers.contains(observer)){
+            inputObservers.remove(observer);
+        }
+    }
+
+    @Override
     public void keyPressed(int keyCode) {
-        textBox.addKeyCode(keyCode);
-        repaintForKeystroke = true;
+        for (IInputObserver observer : inputObservers) {
+            Logger.log(this.getClass().getSimpleName(), "keyCode: " + keyCode + " being passed to " + observer.getClass().getSimpleName() + "." );
+            observer.keyPressed(keyCode);
+        }
+    }
+
+    @Override
+    public void onModelChange(ITextModel model) {
+        textBox.text = model.fitText(textBox.numRows, textBox.numCols);
+        Logger.log("Window","Model changed");
         desktop.repaint();
+    }
+
+    class TextBox {
+        public final int numRows;
+        public final int numCols;
+
+        private BoundingBox textBounds;
+        private DesktopColor textColor;
+
+        private char[][] text;
+
+        public TextBox(BoundingBox bounds, DesktopColor foregroundColor, int numRows, int numCols) {
+            setBounds(bounds);
+
+            textColor = foregroundColor;
+            this.numCols = numCols;
+            this.numRows = numRows;
+
+            text = new char[this.numRows][this.numCols];
+        }
+
+        void repaint(DesktopGraphics desktopGraphics ){
+
+            int baseX = textBounds.getMinX();
+            int baseY = textBounds.getMinY();
+
+            for (int row = 0; row < numRows; row++) {
+                for (int column = 0; column < numCols; column++) {
+                    char charToDraw = text[row][column];
+
+                    int x = baseX + charWidth * column;
+                    int y = baseY + charHeight * row;
+
+                    Point location = new Point(x, y);
+                    desktopGraphics.drawChar(charToDraw, location, textColor);
+                }
+            }
+        }
+
+        public DesktopColor getTextColor() {
+            return textColor;
+        }
+
+        public void setTextColor(DesktopColor textColor) {
+            this.textColor = textColor;
+        }
+
+        public void setBounds(BoundingBox bounds) {
+            this.textBounds = bounds;
+        }
     }
 }

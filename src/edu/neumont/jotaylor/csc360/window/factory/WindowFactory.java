@@ -4,6 +4,8 @@ import edu.neumont.csc415.Desktop;
 import edu.neumont.csc415.DesktopColor;
 import edu.neumont.jotaylor.csc360.configuration.Configuration;
 import edu.neumont.jotaylor.csc360.keyboard.IKeyboard;
+import edu.neumont.jotaylor.csc360.mvc.Controller;
+import edu.neumont.jotaylor.csc360.mvc.TextBuffer;
 import edu.neumont.jotaylor.csc360.util.Logger;
 import edu.neumont.jotaylor.csc360.window.IWindow;
 import edu.neumont.jotaylor.csc360.window.Window;
@@ -26,6 +28,9 @@ public abstract class WindowFactory {
         DesktopColor foreground = configuration.getWindowForegroundColor();
         Window base = new Window(desktop, width, height, x, y, title, background, foreground);
         keyboard.register(base);
+        Controller controller = new Controller(new TextBuffer(), base);
+
+
         return base;
     }
 

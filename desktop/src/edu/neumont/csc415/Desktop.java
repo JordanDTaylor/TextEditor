@@ -71,7 +71,7 @@ public class Desktop {
     }
 
     public int getKeyCode() {
-        int keyCode = ((Integer)this.keyBuffer.remove(0)).intValue();
+        int keyCode = this.keyBuffer.remove(0).intValue();
         return keyCode;
     }
 
@@ -80,7 +80,7 @@ public class Desktop {
     }
 
     public MouseEvent getMouseEvent() {
-        return (MouseEvent)this.mouseBuffer.remove(0);
+        return this.mouseBuffer.remove(0);
     }
 
     private class DesktopFrame extends JFrame implements KeyListener, MouseListener {
