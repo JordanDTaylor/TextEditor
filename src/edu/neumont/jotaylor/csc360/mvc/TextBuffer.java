@@ -6,6 +6,7 @@ import sun.rmi.runtime.Log;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 public class TextBuffer implements ITextModel {
     private List<Character> right;
@@ -26,7 +27,7 @@ public class TextBuffer implements ITextModel {
     }
 
     private char LINE_FEED = 10;
-//    private char CARRIAGE_RETURN = 13;
+    //    private char CARRIAGE_RETURN = 13;
     private char SPACE = 32;
 
     @Override
@@ -34,31 +35,31 @@ public class TextBuffer implements ITextModel {
         logCommand("fltText");
 
 
-        Iterator<Character> leftItr = left.iterator();
-        Iterator<Character> rightItr = right.iterator();
+        ListIterator<Character> leftItr = left.listIterator();
+        ListIterator<Character> rightItr = right.listIterator(right.size());
 
         char [][] text = new char[numRows][numCols];
-try {
-    for (int row = 0; row < numRows; row++) {
-        for (int column = 0; column < numCols; column++) {
-            char next = SPACE;
+        try {
+            for (int row = 0; row < numRows; row++) {
+                for (int column = 0; column < numCols; column++) {
+                    char next = SPACE;
 
-            if (leftItr.hasNext())
-                next = leftItr.next();
+                    if (leftItr.hasNext())
+                        next = leftItr.next();
 
-            else if (rightItr.hasNext())
-                next = rightItr.next();
+                    else if (rightItr.hasPrevious())
+                        next = rightItr.previous();
 
-            if (next == LINE_FEED && column < numCols) {
-                row++;
-                column = 0;
-            } else
-                text[row][column] = next;
+                    if (next == LINE_FEED && column < numCols) {
+                        row++;
+                        column = 0;
+                    } else
+                        text[row][column] = next;
+                }
+            }
+        }catch (Exception e){
+            System.out.println(e.getMessage());
         }
-    }
-}catch (Exception e){
-    System.out.println(e.getMessage());
-}
         return text;
     }
 
@@ -96,7 +97,9 @@ try {
     @Override
     public void hardReturn() {
         logCommand("Hard Return");
+
         left.add(LINE_FEED);
+        notifyOfChange();
     }
 
     @Override
