@@ -7,9 +7,10 @@ import edu.neumont.jotaylor.csc360.util.Logger;
 import edu.neumont.jotaylor.csc360.util.Points;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-public class Window implements IWindow, ITextView{
+public class Window implements IWindow, ITextView {
 
     private String title;
     private TextBox textBox;
@@ -35,8 +36,8 @@ public class Window implements IWindow, ITextView{
 
         BoundingBox textBounds = transposeForTextBox(boundingBox);
 
-        int numRows = textBounds.getHeight()/charHeight;
-        int numCols = textBounds.getWidth()/charWidth;
+        int numRows = textBounds.getHeight() / charHeight;
+        int numCols = textBounds.getWidth() / charWidth;
 
         textBox = new TextBox(textBounds, foregroundColor, numRows, numCols);
 
@@ -79,7 +80,7 @@ public class Window implements IWindow, ITextView{
         textBox.setBounds(transposeForTextBox(boundingBox));
     }
 
-    private BoundingBox transposeForTextBox(BoundingBox box){
+    private BoundingBox transposeForTextBox(BoundingBox box) {
         BoundingBox shrunken = BoundingBoxUtil.shrinkAll(box, margin);
         return BoundingBoxUtil.shiftDown(shrunken, charHeight);
     }
@@ -121,17 +122,17 @@ public class Window implements IWindow, ITextView{
 
     @Override
     public void register(IInputObserver observer) {
-        if(inputObservers.contains(observer)){
+        if (inputObservers.contains(observer)) {
             throw new RuntimeException("Observable already registered");
-        }else{
+        } else {
             this.inputObservers.add(observer);
-            Logger.log(this.getClass().getSimpleName(), "Observer \""+ observer.getClass().getSimpleName() + "\" registered" );
+            Logger.log(this.getClass().getSimpleName(), "Observer \"" + observer.getClass().getSimpleName() + "\" registered");
         }
     }
 
     @Override
     public void deregister(IInputObserver observer) {
-        if(inputObservers.contains(observer)){
+        if (inputObservers.contains(observer)) {
             inputObservers.remove(observer);
         }
     }
@@ -139,18 +140,19 @@ public class Window implements IWindow, ITextView{
     @Override
     public void keyPressed(int keyCode) {
         for (IInputObserver observer : inputObservers) {
-            Logger.log(this.getClass().getSimpleName(), "keyCode: " + keyCode + " being passed to " + observer.getClass().getSimpleName() + "." );
+            Logger.log(this.getClass().getSimpleName(), "keyCode: " + keyCode + " being passed to " + observer.getClass().getSimpleName() + ".");
             observer.keyPressed(keyCode);
         }
     }
-    private Point cursorLocation = new Point(0,0);
+
+    private Point cursorLocation = new Point(0, 0);
 
     @Override
     public void onModelChange(ITextModel model) {
-        textBox.text = model.fitText(textBox.numRows, textBox.numCols);
-        cursorLocation = model.getCursorLocation();
+        textBox.updateText(model.iterator());
+        cursorLocation = model.getCursorLocation(textBox.numRows, textBox.numCols);
 
-        Logger.log("Window","Model changed");
+        Logger.log("Window", "Model changed");
 
         desktop.repaint();
     }
@@ -158,6 +160,9 @@ public class Window implements IWindow, ITextView{
     class TextBox {
         public final int numRows;
         public final int numCols;
+
+        private char LINE_FEED = (char) 10;
+        private char SPACE = 32;
 
         private BoundingBox textBounds;
         private DesktopColor textColor;
@@ -174,7 +179,7 @@ public class Window implements IWindow, ITextView{
             text = new char[this.numRows][this.numCols];
         }
 
-        void repaint(DesktopGraphics desktopGraphics ){
+        void repaint(DesktopGraphics desktopGraphics) {
 
             int baseX = textBounds.getMinX();
             int baseY = textBounds.getMinY();
@@ -188,12 +193,18 @@ public class Window implements IWindow, ITextView{
                     int y = baseY + charHeight * row;
 
                     Point location = new Point(x, y);
-                    if(cursorLocation.getY() == row && cursorLocation.getX() == column )
-                        desktopGraphics.drawLine(Points.addToPoint(location, 0, 4),Points.addToPoint(location, charWidth, 4), cursorColor);
+//                    if (cursorLocation.getY() == row && cursorLocation.getX() == column)
+//                        desktopGraphics.drawLine(Points.addToPoint(location, 0, 4), Points.addToPoint(location, charWidth, 4), cursorColor);
                     desktopGraphics.drawChar(charToDraw, location, textColor);
                 }
             }
+            int cursorX = baseX + charWidth * cursorLocation.getX();
+            int cursorY = baseY + charHeight * cursorLocation.getY() + 2;
+
+            Point cursor = new Point(cursorX, cursorY);
+            desktopGraphics.fillRectangle(cursor, Points.addToPoint(cursor,charWidth, 1 ), cursorColor);
         }
+
         private DesktopColor cursorColor = DesktopColor.WHITE;
 
         public DesktopColor getTextColor() {
@@ -206,6 +217,23 @@ public class Window implements IWindow, ITextView{
 
         public void setBounds(BoundingBox bounds) {
             this.textBounds = bounds;
+        }
+
+        public void updateText(Iterator<Character> iterator) {
+            text = new char[numRows][numCols];
+            for (int row = 0; row < numRows; row++) {
+                for (int column = 0; column < numCols; column++) {
+                    if (iterator.hasNext()) {
+                        char next = iterator.next();
+                        if (next == LINE_FEED && column < numCols) {
+                            row++;
+                            column = -1;
+                        } else {
+                            text[row][column] = next;
+                        }
+                    }
+                }
+            }
         }
     }
 }

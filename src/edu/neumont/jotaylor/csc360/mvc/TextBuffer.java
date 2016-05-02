@@ -18,8 +18,6 @@ public class TextBuffer implements ITextModel {
         right = new ArrayList<>();
         left = new ArrayList<>();
         observers = new ArrayList<>();
-
-        cursorLocaiton = new Point(0, 0);
     }
 
     @Override
@@ -30,61 +28,34 @@ public class TextBuffer implements ITextModel {
     }
 
     private char LINE_FEED = 10;
-    //    private char CARRIAGE_RETURN = 13;
-    private char SPACE = 32;
 
     @Override
-    public char[][] fitText(int numRows, int numCols) {
-        logCommand("fltText");
-
+    public Point getCursorLocation(int numRows, int numCols) {
         ListIterator<Character> leftItr = left.listIterator();
-        ListIterator<Character> rightItr = right.listIterator(right.size());
 
-        char [][] text = new char[numRows][numCols];
-        boolean cursorUpdated = false;
-
+        Point cursorLocaiton = new Point(0,0);
         try {
             for (int row = 0; row < numRows; row++) {
                 for (int column = 0; column < numCols; column++) {
-                    char next = SPACE;
+                    char next;
 
                     if (leftItr.hasNext())
                         next = leftItr.next();
-
                     else {
-                        if(!cursorUpdated){
-                            cursorLocaiton = new Point(column, row);
-                            cursorUpdated = true;
-                        }
-                        if (rightItr.hasPrevious())
-                            next = rightItr.previous();
+                        return new Point(column, row);
                     }
                     if (next == LINE_FEED && column < numCols) {
                         row++;
                         column = -1;
-                    } else
-                        text[row][column] = next;
-
+                    }
                 }
             }
-//            int totalSize = left.size()+right.size();
-//            if(totalSize < numCols*numRows)
-//            {
-//                int r = totalSize/numRows;
-//                int c = totalSize%numRows;
-//
-//            }
         }catch (Exception e){
             System.out.println(e.getMessage());
         }
-        return text;
-    }
-    private Point cursorLocaiton;
-
-    @Override
-    public Point getCursorLocation() {
         return cursorLocaiton;
     }
+
 
     @Override
     public void moveLeft(){
@@ -165,5 +136,37 @@ public class TextBuffer implements ITextModel {
 
     private void logCommand(String command){
         Logger.log(getClass().getSimpleName(), command + " command received");
+    }
+
+
+    @Override
+    public Iterator<Character> iterator() {
+        return new Itr();
+    }
+
+    private class Itr implements Iterator<Character>{
+
+        private int position = 0;
+
+        @Override
+        public boolean hasNext() {
+            int size = left.size() + right.size();
+            return position < size;
+        }
+
+        @Override
+        public Character next() {
+            char next;
+            if (position < left.size()) {
+                next = left.get(position);
+
+            } else {
+                int rightPosition = right.size() - (position - left.size()) - 1;
+                next = right.get(rightPosition);
+            }
+
+            position++;
+            return next;
+        }
     }
 }
