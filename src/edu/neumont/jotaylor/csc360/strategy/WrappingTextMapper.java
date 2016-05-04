@@ -12,62 +12,59 @@ public class WrappingTextMapper implements TextMapper {
     private char LINE_FEED = (char) 10;
 
     Point cursorLocation = new Point(0,0);
+
     @Override
     public char[][] getMap(int numRows, int numCols, ITextModel model) {
-        char[][] characters = new char[numRows][numCols];
 
-
+        char[][] text = new char[numRows][numCols];
         Iterator<Character> iterator = model.iterator();
-        int numCells = numCols * numRows;
-        int letterCount;
 
-        ArrayList<Character> nextLine;
-        for (int row = 0; row < numRows; row++) {
-            int column = 0;
+        int column =0;
+        int row = 0;
 
-            do {
-                ArrayList<Character> word = getNextWord(iterator);
-                if(word.size() > numCols - column && column) {
-                    row++;
-                    column = 0;
+        while(iterator.hasNext()){
 
-                }
+            ArrayList<Character> word = getNextWord(iterator);
+            int spaceLeft = numCols - column;
 
+            if(word.size() > spaceLeft){
+                column = 0;
+                row++;
+            }
 
-                nextLine = new ArrayList<>(numCols);
-                letterCount = 0;
+            if(column<=numCols){
+                copyWordTo(word, text, row, column);
+                column += word.size();
 
-            }while(iterator.hasNext() && letterCount < numCols)
-
-
-            char[] nextRow = new char[numCols];
-
-            for (column = 0; column < numCols; column++) {
-                    else lastSpace = 0;
-
-                    if (next == LINE_FEED && column < numCols) {
-                        row++;
-                        column = -1;
-                    } else {
-                        if(lastSpace >= 0 && lastSpace < numCols -1){
-
-                        }
-                        text[row][column] = next;
-
-                    }
+                if(column < numCols) {
+                    text[row][column] = ' ';
+                    column++;
                 }
             }
         }
         return text;
     }
 
+    private void copyWordTo(ArrayList<Character> word, char[][] text, int row, int column) {
+        for (char c : word) {
+            text[row][column] = c;
+            column++;
+        }
+    }
+
     private ArrayList<Character> getNextWord(Iterator<Character> iterator){
-        Character next;
+        char next;
         ArrayList<Character> word = new ArrayList<>();
+
         while(iterator.hasNext()){
             next = iterator.next();
+
+            if(next == ' ')
+                break;
+
             word.add(next);
-            if(!Character.isLetterOrDigit(next))
+
+            if(next == LINE_FEED)
                 break;
         }
         return word;

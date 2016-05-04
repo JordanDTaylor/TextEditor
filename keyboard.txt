@@ -1,11 +1,3 @@
-WindowType:TITLE_BORDER
-KeyboardType:MOC
-WindowHeight: 200
-WindowWidth: 400
-TitleHeight: 30
-BorderWidth: 3
-WindowBackgroundColor: CYAN
-WindowForegroundColor: BLUE
-TitleBackgroundColor: DARK_GRAY
-TitleForegroundColor: WHITE
-BorderColor: DARK_GRAY
+One two three four five six seven eight nine ten eleven twelve thirteen fourteen
+fifteen sixteen seventeen eighteen nineteen twenty twentyone twentytwo.
+<

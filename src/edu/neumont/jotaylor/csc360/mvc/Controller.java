@@ -46,7 +46,9 @@ public class Controller implements IInputObserver{
     @Override
     public void keyPressed(int keyCode) {
         Logger.log(this.getClass().getSimpleName(), "keyCode: " + keyCode + " received." );
-        System.out.println(keyCode + ":" + (char)keyCode);
+
+//        System.out.println(keyCode + ":" + (char)keyCode);
+
         Command command=null;
 
         switch (keyCode){
@@ -93,11 +95,15 @@ public class Controller implements IInputObserver{
                 break;
 
             case ENABLE_WORD_WRAP:
+                System.out.println("enable word wrap");
+
                 view.enableWordWrap();
                 model.triggerUpdate();
                 break;
 
             case DISABLE_WORD_WRAP:
+                System.out.println("disable word wrap");
+
                 view.disableWordWrap();
                 model.triggerUpdate();
                 break;

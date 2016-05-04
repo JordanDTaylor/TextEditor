@@ -57,7 +57,7 @@ public class MockKeyboard implements IKeyboard, Runnable {
     private String readKeyFile(){
         String line;
         String out = "";
-        try(BufferedReader reader = new BufferedReader(new FileReader("user.config"))) {
+        try(BufferedReader reader = new BufferedReader(new FileReader("keyboard.txt"))) {
             while((line = reader.readLine()) != null){
                 out+=line + "\n";
             }
