@@ -120,6 +120,10 @@ public class Window implements IWindow, ITextView {
         return backgroundColor;
     }
 
+
+    ////////////////////////////////////////////////////////////////////////////
+    //Observable
+    //
     @Override
     public void register(IInputObserver observer) {
         if (inputObservers.contains(observer)) {
@@ -144,9 +148,12 @@ public class Window implements IWindow, ITextView {
             observer.keyPressed(keyCode);
         }
     }
+    //
+    //end Observable
+    ////////////////////////////////////////////////////////////////////////////
 
-    private Point cursorLocation = new Point(0, 0);
-
+    ////////////////////////////////////////////////////////////////////////////
+    //Observer
     @Override
     public void onModelChange(ITextModel model) {
         textBox.updateText(model.iterator());
@@ -156,6 +163,13 @@ public class Window implements IWindow, ITextView {
 
         desktop.repaint();
     }
+    //
+    //end Observer
+    ////////////////////////////////////////////////////////////////////////////
+
+
+    private Point cursorLocation = new Point(0, 0);
+
 
     class TextBox {
         public final int numRows;

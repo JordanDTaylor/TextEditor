@@ -7,8 +7,8 @@ public interface ITextModel extends Iterable<Character>{
     void deregister(ITextModelObserver observer);
 
     void add(char c);
-    void backspace();
-    void delete();
+    char backspace();
+    char delete();
     void hardReturn();
     void moveLeft();
     void moveRight();

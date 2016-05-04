@@ -2,7 +2,6 @@ package edu.neumont.jotaylor.csc360.mvc;
 
 import edu.neumont.csc415.Point;
 import edu.neumont.jotaylor.csc360.util.Logger;
-import sun.rmi.runtime.Log;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -10,24 +9,16 @@ import java.util.List;
 import java.util.ListIterator;
 
 public class TextBuffer implements ITextModel {
+    private char LINE_FEED = 10;
+
     private List<Character> right;
     private List<Character> left;
-    private List<ITextModelObserver> observers;
 
     public TextBuffer() {
         right = new ArrayList<>();
         left = new ArrayList<>();
         observers = new ArrayList<>();
     }
-
-    @Override
-    public void add(char c) {
-        logCommand("add " + c);
-        left.add(c);
-        notifyOfChange();
-    }
-
-    private char LINE_FEED = 10;
 
     @Override
     public Point getCursorLocation(int numRows, int numCols) {
@@ -56,6 +47,15 @@ public class TextBuffer implements ITextModel {
         return cursorLocaiton;
     }
 
+    ////////////////////////////////////////////////////////////////////////////
+    //Commands
+    //
+    @Override
+    public void add(char c) {
+        logCommand("add " + c);
+        left.add(c);
+        notifyOfChange();
+    }
 
     @Override
     public void moveLeft(){
@@ -78,14 +78,17 @@ public class TextBuffer implements ITextModel {
     }
 
     @Override
-    public void delete(){
+    public char delete(){
         logCommand("Delete");
+        char removed = 0;
 
         if(!right.isEmpty()){
             int tail = right.size() - 1;
-            right.remove(tail);
+            removed = right.remove(tail);
             notifyOfChange();
         }
+
+        return removed;
     }
 
     @Override
@@ -97,16 +100,25 @@ public class TextBuffer implements ITextModel {
     }
 
     @Override
-    public void backspace(){
+    public char backspace(){
         logCommand("Backspace");
+        char removed = 0;
 
         if(!left.isEmpty()){
             int tail = left.size() - 1;
-            left.remove(tail);
+            removed = left.remove(tail);
             notifyOfChange();
         }
-    }
 
+        return removed;
+    }
+    // end Commands
+    /////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////////////////////
+    //Observable
+    //
+    private List<ITextModelObserver> observers;
 
     @Override
     public void register(ITextModelObserver observer) {
@@ -133,12 +145,13 @@ public class TextBuffer implements ITextModel {
             observer.onModelChange(this);
         }
     }
-
-    private void logCommand(String command){
-        Logger.log(getClass().getSimpleName(), command + " command received");
-    }
+    // end observable
+    /////////////////////////////////////
 
 
+    ////////////////////////////////////////////////////////////////////////////
+    //Iterable
+    //
     @Override
     public Iterator<Character> iterator() {
         return new Itr();
@@ -169,4 +182,12 @@ public class TextBuffer implements ITextModel {
             return next;
         }
     }
+    //
+    //end iterable
+    /////////////////////////////////////
+
+    private void logCommand(String command){
+        Logger.log(getClass().getSimpleName(), command + " command received");
+    }
+
 }
