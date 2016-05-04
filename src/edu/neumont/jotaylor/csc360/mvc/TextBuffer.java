@@ -21,30 +21,13 @@ public class TextBuffer implements ITextModel {
     }
 
     @Override
-    public Point getCursorLocation(int numRows, int numCols) {
-        ListIterator<Character> leftItr = left.listIterator();
+    public int getCursorOffset() {
+        return left.size();
+    }
 
-        Point cursorLocaiton = new Point(0,0);
-        try {
-            for (int row = 0; row < numRows; row++) {
-                for (int column = 0; column < numCols; column++) {
-                    char next;
-
-                    if (leftItr.hasNext())
-                        next = leftItr.next();
-                    else {
-                        return new Point(column, row);
-                    }
-                    if (next == LINE_FEED && column < numCols) {
-                        row++;
-                        column = -1;
-                    }
-                }
-            }
-        }catch (Exception e){
-            System.out.println(e.getMessage());
-        }
-        return cursorLocaiton;
+    @Override
+    public void triggerUpdate() {
+        notifyOfChange();
     }
 
     ////////////////////////////////////////////////////////////////////////////

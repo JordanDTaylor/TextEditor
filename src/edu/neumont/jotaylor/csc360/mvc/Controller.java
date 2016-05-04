@@ -18,20 +18,27 @@ public class Controller implements IInputObserver{
     private static final int UNDO = (int)'-';
     private static final int REDO = (int)'+';
 
+    private static final int ENABLE_WORD_WRAP = (int)'<';
+    private static final int DISABLE_WORD_WRAP = (int)'>';
+
     private static final int LEFT_ARROW = 17;
     private static final int UP_ARROW = 18;
     private static final int RIGHT_ARROW = 19;
     private static final int DOWN_ARROW = 20;
 
     private final ITextModel model;
+    private final ITextView view;
 
     private Deque<Command> history;
     private Deque<Command> redoHistory;
 
     public Controller(ITextModel model, ITextView view) {
         this.model = model;
+        this.view = view;
+
         view.register(this);
         model.register(view);
+
         history = new LinkedList<>();
         redoHistory = new LinkedList<>();
     }
@@ -46,25 +53,32 @@ public class Controller implements IInputObserver{
             case SINGLE_QUOTE:
                 command = new AddCommand(model, '\'');
                 break;
+
             case BACKSPACE:
                 command = new BackspaceCommand(model);
                 break;
+
             case DELETE:
                 command = new DeleteCommand(model);
                 break;
+
             case HARD_RETURN:
                 command = new HardReturnCommand(model);
                 break;
+
             case LEFT_ARROW:
                 command = new MoveLeftCommand(model);
                 break;
+
             case RIGHT_ARROW:
                 command = new MoveRightCommand(model);
                 break;
+
             case UP_ARROW:
 //                model.moveUp();
 //                model.add((char)0x25B4);
                 break;
+
             case DOWN_ARROW:
 //                model.moveDown();
 //                model.add((char)0x25BE);
@@ -73,9 +87,21 @@ public class Controller implements IInputObserver{
             case UNDO:
                 undo();
                 break;
+
             case REDO:
                 redo();
                 break;
+
+            case ENABLE_WORD_WRAP:
+                view.enableWordWrap();
+                model.triggerUpdate();
+                break;
+
+            case DISABLE_WORD_WRAP:
+                view.disableWordWrap();
+                model.triggerUpdate();
+                break;
+
             default:
                 command = new AddCommand(model, (char) keyCode);
                 break;

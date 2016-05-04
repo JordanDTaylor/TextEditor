@@ -13,6 +13,8 @@ public interface ITextModel extends Iterable<Character>{
     void moveLeft();
     void moveRight();
 
-    Point getCursorLocation(int numRow, int numCol);
+    int getCursorOffset();
+
+    void triggerUpdate();
 }
 

@@ -2,12 +2,14 @@ package edu.neumont.jotaylor.csc360.window;
 
 import edu.neumont.csc415.*;
 import edu.neumont.jotaylor.csc360.mvc.*;
+import edu.neumont.jotaylor.csc360.strategy.NonWrappingTextMapper;
+import edu.neumont.jotaylor.csc360.strategy.TextMapper;
+import edu.neumont.jotaylor.csc360.strategy.WrappingTextMapper;
 import edu.neumont.jotaylor.csc360.util.BoundingBoxUtil;
 import edu.neumont.jotaylor.csc360.util.Logger;
 import edu.neumont.jotaylor.csc360.util.Points;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class Window implements IWindow, ITextView {
@@ -19,6 +21,8 @@ public class Window implements IWindow, ITextView {
     private boolean repaintDecorators;
     private boolean repaintForKeystroke;
     private DesktopColor backgroundColor;
+
+    private TextMapper textMapper;
 
     private final int margin = 5;
     private final int charWidth;
@@ -40,6 +44,7 @@ public class Window implements IWindow, ITextView {
         int numCols = textBounds.getWidth() / charWidth;
 
         textBox = new TextBox(textBounds, foregroundColor, numRows, numCols);
+        textMapper = new NonWrappingTextMapper();
 
         this.backgroundColor = backgroundColor;
         setForegroundColor(foregroundColor);
@@ -156,11 +161,9 @@ public class Window implements IWindow, ITextView {
     //Observer
     @Override
     public void onModelChange(ITextModel model) {
-        textBox.updateText(model.iterator());
-        cursorLocation = model.getCursorLocation(textBox.numRows, textBox.numCols);
+        textBox.updateText(model, textMapper);
 
         Logger.log("Window", "Model changed");
-
         desktop.repaint();
     }
     //
@@ -171,11 +174,27 @@ public class Window implements IWindow, ITextView {
     private Point cursorLocation = new Point(0, 0);
 
 
+    ////////////////////////////////////////////////////////////////////////////
+    //Strategy
+    //
+    @Override
+    public void enableWordWrap() {
+        textMapper = new WrappingTextMapper();
+
+    }
+
+    @Override
+    public void disableWordWrap() {
+        textMapper = new NonWrappingTextMapper();
+    }
+    //
+    //end Strategy
+    ////////////////////////////////////////////////////////////////////////////
+
     class TextBox {
         public final int numRows;
         public final int numCols;
 
-        private char LINE_FEED = (char) 10;
         private char SPACE = 32;
 
         private BoundingBox textBounds;
@@ -207,8 +226,6 @@ public class Window implements IWindow, ITextView {
                     int y = baseY + charHeight * row;
 
                     Point location = new Point(x, y);
-//                    if (cursorLocation.getY() == row && cursorLocation.getX() == column)
-//                        desktopGraphics.drawLine(Points.addToPoint(location, 0, 4), Points.addToPoint(location, charWidth, 4), cursorColor);
                     desktopGraphics.drawChar(charToDraw, location, textColor);
                 }
             }
@@ -233,21 +250,9 @@ public class Window implements IWindow, ITextView {
             this.textBounds = bounds;
         }
 
-        public void updateText(Iterator<Character> iterator) {
-            text = new char[numRows][numCols];
-            for (int row = 0; row < numRows; row++) {
-                for (int column = 0; column < numCols; column++) {
-                    if (iterator.hasNext()) {
-                        char next = iterator.next();
-                        if (next == LINE_FEED && column < numCols) {
-                            row++;
-                            column = -1;
-                        } else {
-                            text[row][column] = next;
-                        }
-                    }
-                }
-            }
+        public void updateText(ITextModel model, TextMapper textMapper) {
+            text = textMapper.getMap(numRows, numCols, model);
+            cursorLocation = textMapper.getCursorLocation();
         }
     }
 }
