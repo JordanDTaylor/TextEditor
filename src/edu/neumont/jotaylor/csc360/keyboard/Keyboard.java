@@ -45,7 +45,6 @@ public class Keyboard implements IKeyboard, Runnable {
         }
     }
 
-
     @Override
     public void deregister(IInputObserver observer) {
         if(this.observers.contains(observer)){

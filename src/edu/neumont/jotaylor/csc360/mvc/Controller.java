@@ -1,36 +1,33 @@
 package edu.neumont.jotaylor.csc360.mvc;
 
-import edu.neumont.csc415.Desktop;
 import edu.neumont.jotaylor.csc360.commands.*;
+import edu.neumont.jotaylor.csc360.state.CommandState;
+import edu.neumont.jotaylor.csc360.state.CommandWState;
+import edu.neumont.jotaylor.csc360.state.NoCommandState;
+import edu.neumont.jotaylor.csc360.state.State;
 import edu.neumont.jotaylor.csc360.util.Logger;
+import edu.neumont.jotaylor.csc360.util.RandomNumberGenerator;
+import static edu.neumont.jotaylor.csc360.util.KeyConstants.*;
 
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 public class Controller implements IInputObserver{
 
-    private static final int SINGLE_QUOTE = 222;
-    private static final int BACKSPACE = 8;
-    private static final int DELETE = 127;
-    private static final int HARD_RETURN = 10;
 
-    private static final int UNDO = (int)'-';
-    private static final int REDO = (int)'+';
+    private State noCommandState;
+    private State commandState;
+    private State commandWState;
 
-    private static final int ENABLE_WORD_WRAP = (int)'<';
-    private static final int DISABLE_WORD_WRAP = (int)'>';
-
-    private static final int LEFT_ARROW = 17;
-    private static final int UP_ARROW = 18;
-    private static final int RIGHT_ARROW = 19;
-    private static final int DOWN_ARROW = 20;
+    private State state;
 
     private final ITextModel model;
     private final ITextView view;
 
-    private Deque<Command> history;
-    private Deque<Command> redoHistory;
+    private final Deque<Command> history;
+    private final Deque<Command> redoHistory;
+    private final Deque<Command> commandQueue;
 
     public Controller(ITextModel model, ITextView view) {
         this.model = model;
@@ -41,87 +38,129 @@ public class Controller implements IInputObserver{
 
         history = new LinkedList<>();
         redoHistory = new LinkedList<>();
+        commandQueue = new LinkedList<>();
+
+        noCommandState = new NoCommandState(this);
+        commandState = new CommandState(this);
+        commandWState = new CommandWState(this);
+
+        state = noCommandState;
     }
 
     @Override
     public void keyPressed(int keyCode) {
         Logger.log(this.getClass().getSimpleName(), "keyCode: " + keyCode + " received." );
 
-//        System.out.println(keyCode + ":" + (char)keyCode);
-
-        Command command=null;
+        System.out.println(keyCode + ":" + (char)keyCode);
 
         switch (keyCode){
-            case SINGLE_QUOTE:
-                command = new AddCommand(model, '\'');
+
+            case COMMAND_KEY:
+                state.commandKeyPressed();
                 break;
 
-            case BACKSPACE:
-                command = new BackspaceCommand(model);
+            case WRAP:
+                state.wrap();
                 break;
 
-            case DELETE:
-                command = new DeleteCommand(model);
+            case ENABLE:
+                state.enable();
                 break;
 
-            case HARD_RETURN:
-                command = new HardReturnCommand(model);
-                break;
-
-            case LEFT_ARROW:
-                command = new MoveLeftCommand(model);
-                break;
-
-            case RIGHT_ARROW:
-                command = new MoveRightCommand(model);
-                break;
-
-            case UP_ARROW:
-//                model.moveUp();
-//                model.add((char)0x25B4);
-                break;
-
-            case DOWN_ARROW:
-//                model.moveDown();
-//                model.add((char)0x25BE);
+            case DISABLE:
+                state.disable();
                 break;
 
             case UNDO:
-                undo();
+                state.undo();
                 break;
 
             case REDO:
-                redo();
+                state.redo();
                 break;
 
-            case ENABLE_WORD_WRAP:
-                System.out.println("enable word wrap");
-
-                view.enableWordWrap();
-                model.triggerUpdate();
-                break;
-
-            case DISABLE_WORD_WRAP:
-                System.out.println("disable word wrap");
-
-                view.disableWordWrap();
-                model.triggerUpdate();
+            case MYSTERY_KEY:
+                state.mysteryKey();
                 break;
 
             default:
-                command = new AddCommand(model, (char) keyCode);
+                state.otherKeyPressed(keyCode);
                 break;
         }
+        if(!commandQueue.isEmpty())
+            executeCommands();
+    }
 
-        if(command!=null){
-            command.execute();
-            redoHistory.clear();
-            history.add(command);
+    public void processNormalKey(int keyCode){
+        switch (keyCode){
+
+            case SINGLE_QUOTE:
+                queueCommand(new AddCommand(model, '\''));
+                break;
+
+            case BACKSPACE:
+                queueCommand(new BackspaceCommand(model));
+                break;
+
+            case DELETE:
+                queueCommand(new DeleteCommand(model));
+                break;
+
+            case HARD_RETURN:
+                queueCommand(new HardReturnCommand(model));
+                break;
+
+            case LEFT_ARROW:
+                queueCommand( new MoveLeftCommand(model));
+                break;
+
+            case RIGHT_ARROW:
+                queueCommand( new MoveRightCommand(model));
+                break;
+
+            default:
+                queueCommand(new AddCommand(model, (char) keyCode));
+                break;
         }
     }
 
 
-    private void undo() {
+    private void queueCommand(Command command) {
+        commandQueue.addLast(command);
+    }
+
+    private void executeCommands(){
+        redoHistory.clear();
+
+        while(!commandQueue.isEmpty()){
+            Command command = commandQueue.pollFirst();
+
+            assert(command!=null);
+            command.execute();
+            history.addLast(command);
+        }
+        assert (commandQueue.isEmpty());
+    }
+
+    public void mysteryKeyCommand() {
+        RandomNumberGenerator random = RandomNumberGenerator.getInstance();
+        int randomKeyCode = random.nextInt(mappedUnicodeCodePoints)+33;
+        commandQueue.addLast(new AddCommand(model, (char)randomKeyCode));
+    }
+
+    public void disableWrap() {
+        view.disableWordWrap();
+        model.triggerUpdate();
+    }
+
+    public void enableWrap() {
+        view.enableWordWrap();
+        model.triggerUpdate();
+    }
+
+    private final int mappedUnicodeCodePoints = 126 -33;
+
+    public void undo() {
         if(!history.isEmpty()){
             do{
                 Command command = history.pollLast();
@@ -131,8 +170,7 @@ public class Controller implements IInputObserver{
         }
     }
 
-
-    private void redo() {
+    public void redo() {
         if(!redoHistory.isEmpty()) {
             do {
                 Command command = redoHistory.pollLast();
@@ -141,5 +179,18 @@ public class Controller implements IInputObserver{
             } while (!redoHistory.isEmpty() && !redoHistory.peekLast().isSignificant());
         }
     }
+
+    public void setNoCommandState() {
+        state = noCommandState;
+    }
+
+    public void setCommandState() {
+        state = commandState;
+    }
+
+    public void setCommandWState() {
+        state = commandWState;
+    }
+
 }
 

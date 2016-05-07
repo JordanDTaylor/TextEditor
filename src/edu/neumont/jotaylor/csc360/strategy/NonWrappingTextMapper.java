@@ -11,7 +11,7 @@ public class NonWrappingTextMapper implements TextMapper {
     Point cursorLocation = new Point(0,0);
     @Override
     public char[][] getMap(int numRows, int numCols, ITextModel model) {
-        int cursorOffset = model.getCursorOffset()+1;
+        int cursorOffset = model.getCursorOffset() + 1;
 
         char[][] text = new char[numRows][numCols];
         Iterator<Character> iterator = model.iterator();
